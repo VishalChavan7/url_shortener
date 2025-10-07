@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body class="min-h-screen font-sans p-6 transition-colors duration-300">
+    <div class="max-w-5xl mx-auto py-8">
+      <!-- Header with theme toggle -->
+      <div class="text-center mb-12 relative">
+        <button
+          id="themeToggle"
+          class="absolute right-0 top-0 p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border"
+          aria-label="Toggle theme"
+        >
+          <svg
+            id="sunIcon"
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            ></path>
+          </svg>
+          <svg
+            id="moonIcon"
+            class="w-6 h-6 hidden"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+            ></path>
+          </svg>
+        </button>
+
+        <div class="inline-block">
+          <h1
+            class="text-5xl font-bold mb-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+          >
+            URL Shortener
+          </h1>
+          <p class="text-lg" id="subtitle">
+            Transform long URLs into short, shareable links
+          </p>
+        </div>
+      </div>
+
+      <!-- Form card -->
+      <form
+        method="POST"
+        class="backdrop-blur-lg shadow-2xl rounded-2xl p-8 mb-10 border transition-all duration-300"
+        id="formCard"
+      >
+        <label class="block">
+          <span
+            class="font-semibold text-sm uppercase tracking-wide mb-2 block"
+            id="formLabel"
+            >Enter URL</span
+          >
+          <div class="relative">
+            <input
+              type="text"
+              name="url"
+              placeholder="https://example.com/your-very-long-url-here"
+              required
+              id="urlInput"
+              class="mt-1 block w-full rounded-xl border-2 p-4 pr-32 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all duration-200"
+            />
+            <button
+              class="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              type="submit"
+            >
+              Shorten
+            </button>
+          </div>
+        </label>
+      </form>
+
+      <!-- URLs list section -->
+      <div
+        class="backdrop-blur-lg shadow-2xl rounded-2xl p-8 border"
+        id="urlsCard"
+      >
+        <h2
+          class="text-2xl font-bold mb-6 flex items-center gap-3"
+          id="urlsTitle"
+        >
+          <span
+            class="w-1.5 h-8 bg-gradient-to-b from-indigo-600 to-purple-600 rounded-full"
+          ></span>
+          Shortened URLs
+        </h2>
+
+        {% if all_urls %}
+        <div class="overflow-x-auto rounded-xl border" id="tableWrapper">
+          <table class="w-full table-fixed">
+            <thead>
+              <tr id="tableHeader">
+                <th
+                  class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider w-64"
+                >
+                  Short URL
+                </th>
+                <th
+                  class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider"
+                >
+                  Original URL
+                </th>
+                <th
+                  class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider w-24"
+                >
+                  Visits
+                </th>
+                <th
+                  class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider w-32"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y" id="tableBody">
+              {% for url in all_urls %}
+              <tr class="transition-colors duration-150 table-row">
+                <td class="px-4 py-4">
+                  <div class="flex items-center gap-2">
+                    <a
+                      href="/{{ url[1]}}"
+                      target="_blank"
+                      class="font-medium flex items-center gap-2 group short-url-link"
+                    >
+                      <span class="group-hover:underline truncate"
+                        >localhost:8000/{{url[1]}}</span
+                      >
+                      <svg
+                        class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        ></path>
+                      </svg>
+                    </a>
+                    <button
+                      onclick="copyToClipboard('http://localhost:8000/{{url[1]}}', this)"
+                      class="p-1.5 rounded-lg transition-all duration-150 flex-shrink-0 copy-btn"
+                      title="Copy short URL"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="truncate original-url" title="{{url[0]}}">
+                    {{url[0]}}
+                  </div>
+                </td>
+                <td class="px-4 py-4">
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium visit-badge"
+                  >
+                    {{url[2]}}
+                  </span>
+                </td>
+                <td class="px-4 py-4">
+                  <form
+                    action="/delete/{{url[1]}}"
+                    method="POST"
+                    onsubmit="return confirm('Are you sure you want to delete this URL?')"
+                    class="inline"
+                  >
+                    <button
+                      type="submit"
+                      class="font-medium px-3 py-1.5 rounded-lg transition-all duration-150 delete-btn"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-10">
+          <svg
+            class="w-20 h-20 mx-auto mb-4 empty-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+            ></path>
+          </svg>
+          <p class="text-lg font-medium empty-title">No shortened URLs yet</p>
+          <p class="text-sm mt-2 empty-subtitle">
+            Start by shortening your first URL above
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      // Theme management
+      let isDark = false;
+
+      function applyTheme(dark) {
+        isDark = dark;
+        const body = document.body;
+        const themeToggle = document.getElementById("themeToggle");
+        const sunIcon = document.getElementById("sunIcon");
+        const moonIcon = document.getElementById("moonIcon");
+
+        if (dark) {
+          // Dark theme
+          body.style.background =
+            "linear-gradient(to bottom right, #111827, #4c1d95, #312e81)";
+          body.style.color = "#f3f4f6";
+
+          // Icons
+          sunIcon.classList.add("hidden");
+          moonIcon.classList.remove("hidden");
+          moonIcon.style.color = "#fbbf24";
+
+          // Theme toggle button
+          themeToggle.style.background = "rgba(31, 41, 55, 0.7)";
+          themeToggle.style.borderColor = "rgba(55, 65, 81, 0.5)";
+
+          // Subtitle
+          document.getElementById("subtitle").style.color = "#9ca3af";
+
+          // Form card
+          const formCard = document.getElementById("formCard");
+          formCard.style.background = "rgba(31, 41, 55, 0.7)";
+          formCard.style.borderColor = "rgba(55, 65, 81, 0.5)";
+
+          document.getElementById("formLabel").style.color = "#d1d5db";
+
+          const urlInput = document.getElementById("urlInput");
+          urlInput.style.borderColor = "#4b5563";
+          urlInput.style.background = "#374151";
+          urlInput.style.color = "#e5e7eb";
+
+          // URLs card
+          const urlsCard = document.getElementById("urlsCard");
+          urlsCard.style.background = "rgba(31, 41, 55, 0.7)";
+          urlsCard.style.borderColor = "rgba(55, 65, 81, 0.5)";
+
+          document.getElementById("urlsTitle").style.color = "#f3f4f6";
+
+          // Table
+          const tableWrapper = document.getElementById("tableWrapper");
+          if (tableWrapper) {
+            tableWrapper.style.borderColor = "#374151";
+
+            const tableHeader = document.getElementById("tableHeader");
+            tableHeader.style.background =
+              "linear-gradient(to right, #1f2937, rgba(88, 28, 135, 0.3))";
+            Array.from(tableHeader.children).forEach((th) => {
+              th.style.color = "#d1d5db";
+            });
+
+            const tableBody = document.getElementById("tableBody");
+            tableBody.style.background = "#1f2937";
+
+            document.querySelectorAll(".table-row").forEach((row) => {
+              row.style.borderColor = "#374151";
+            });
+
+            document.querySelectorAll(".short-url-link").forEach((link) => {
+              link.style.color = "#818cf8";
+            });
+
+            document.querySelectorAll(".original-url").forEach((url) => {
+              url.style.color = "#9ca3af";
+            });
+
+            document.querySelectorAll(".visit-badge").forEach((badge) => {
+              badge.style.background = "rgba(88, 28, 135, 0.5)";
+              badge.style.color = "#c4b5fd";
+            });
+
+            document.querySelectorAll(".copy-btn").forEach((btn) => {
+              btn.style.color = "#9ca3af";
+            });
+
+            document.querySelectorAll(".delete-btn").forEach((btn) => {
+              btn.style.color = "#f87171";
+            });
+          }
+
+          // Empty state
+          const emptyIcon = document.querySelector(".empty-icon");
+          if (emptyIcon) {
+            emptyIcon.style.color = "#4b5563";
+          }
+          const emptyTitle = document.querySelector(".empty-title");
+          if (emptyTitle) {
+            emptyTitle.style.color = "#9ca3af";
+          }
+          const emptySubtitle = document.querySelector(".empty-subtitle");
+          if (emptySubtitle) {
+            emptySubtitle.style.color = "#6b7280";
+          }
+        } else {
+          // Light theme
+          body.style.background =
+            "linear-gradient(to bottom right, #eef2ff, #fae8ff, #fce7f3)";
+          body.style.color = "#1f2937";
+
+          // Icons
+          sunIcon.classList.remove("hidden");
+          moonIcon.classList.add("hidden");
+          sunIcon.style.color = "#4b5563";
+
+          // Theme toggle button
+          themeToggle.style.background = "rgba(255, 255, 255, 0.7)";
+          themeToggle.style.borderColor = "rgba(255, 255, 255, 0.2)";
+
+          // Subtitle
+          document.getElementById("subtitle").style.color = "#4b5563";
+
+          // Form card
+          const formCard = document.getElementById("formCard");
+          formCard.style.background = "rgba(255, 255, 255, 0.7)";
+          formCard.style.borderColor = "rgba(255, 255, 255, 0.2)";
+
+          document.getElementById("formLabel").style.color = "#374151";
+
+          const urlInput = document.getElementById("urlInput");
+          urlInput.style.borderColor = "#e5e7eb";
+          urlInput.style.background = "#ffffff";
+          urlInput.style.color = "#374151";
+
+          // URLs card
+          const urlsCard = document.getElementById("urlsCard");
+          urlsCard.style.background = "rgba(255, 255, 255, 0.7)";
+          urlsCard.style.borderColor = "rgba(255, 255, 255, 0.2)";
+
+          document.getElementById("urlsTitle").style.color = "#1f2937";
+
+          // Table
+          const tableWrapper = document.getElementById("tableWrapper");
+          if (tableWrapper) {
+            tableWrapper.style.borderColor = "#e5e7eb";
+
+            const tableHeader = document.getElementById("tableHeader");
+            tableHeader.style.background =
+              "linear-gradient(to right, #eef2ff, #fae8ff)";
+            Array.from(tableHeader.children).forEach((th) => {
+              th.style.color = "#374151";
+            });
+
+            const tableBody = document.getElementById("tableBody");
+            tableBody.style.background = "#ffffff";
+
+            document.querySelectorAll(".table-row").forEach((row) => {
+              row.style.borderColor = "#f3f4f6";
+            });
+
+            document.querySelectorAll(".short-url-link").forEach((link) => {
+              link.style.color = "#4f46e5";
+            });
+
+            document.querySelectorAll(".original-url").forEach((url) => {
+              url.style.color = "#4b5563";
+            });
+
+            document.querySelectorAll(".visit-badge").forEach((badge) => {
+              badge.style.background = "#e9d5ff";
+              badge.style.color = "#6b21a8";
+            });
+
+            document.querySelectorAll(".copy-btn").forEach((btn) => {
+              btn.style.color = "#6b7280";
+            });
+
+            document.querySelectorAll(".delete-btn").forEach((btn) => {
+              btn.style.color = "#ef4444";
+            });
+          }
+
+          // Empty state
+          const emptyIcon = document.querySelector(".empty-icon");
+          if (emptyIcon) {
+            emptyIcon.style.color = "#d1d5db";
+          }
+          const emptyTitle = document.querySelector(".empty-title");
+          if (emptyTitle) {
+            emptyTitle.style.color = "#6b7280";
+          }
+          const emptySubtitle = document.querySelector(".empty-subtitle");
+          if (emptySubtitle) {
+            emptySubtitle.style.color = "#9ca3af";
+          }
+        }
+      }
+
+      // Initialize theme
+      const savedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      applyTheme(savedTheme === "dark" || (!savedTheme && prefersDark));
+
+      // Theme toggle
+      document
+        .getElementById("themeToggle")
+        .addEventListener("click", function () {
+          const newTheme = !isDark;
+          applyTheme(newTheme);
+          localStorage.setItem("theme", newTheme ? "dark" : "light");
+        });
+
+      // Copy to clipboard
+      function copyToClipboard(text, button) {
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            const originalHTML = button.innerHTML;
+            button.innerHTML =
+              '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            button.style.color = "#10b981";
+
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+              button.style.color = isDark ? "#9ca3af" : "#6b7280";
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error("Failed to copy:", err);
+          });
+      }
+    </script>
+  </body>
+</html>
